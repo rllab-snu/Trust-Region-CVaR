@@ -2,7 +2,7 @@
 
 This is an official GitHub Repository for paper ([link](https://doi.org/10.1109/LRA.2022.3141829)):
 
-- D. Kim and S. Oh, “TRC: Trust region conditional value at risk for
+- Dohyeong Kim and Songhwai Oh, “TRC: Trust region conditional value at risk for
 safe reinforcement learning,” IEEE Robotics and Automation Letters,
 vol. 7, no. 2, pp. 2621–2628, Apr. 2022.
 
