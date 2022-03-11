@@ -1,0 +1,229 @@
+<mujoco model="jackal_safe_navigation">
+	<compiler angle="radian" meshdir="meshes/" />
+
+    <size njmax="3000" nconmax="1000" />
+    <option gravity="0 0 -9.8"/>
+	<option timestep="0.002">
+		<flag warmstart="enable"></flag>
+	</option>
+
+    <default>
+        <geom condim="6" density="5" rgba="0.7 0.7 0.7 1" size=".05" type="sphere"/>
+        <joint damping=".001"/>
+        <site size="0.032" type="sphere"/>
+        <velocity ctrlrange="-1 1" ctrllimited="true" forcerange="-1 1" forcelimited="true"/>
+    </default>
+
+    <asset>
+        <!--Meshes-->
+        <mesh name="base" file="jackal-base.stl" />
+        <mesh name="wheel" file="jackal-wheel.stl" />
+        <mesh name="fender" file="jackal-fender.stl" />
+
+        <!--Textures-->
+        <!-- <texture name="floor_tex"   type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 .2 .3" width="100" height="100" /> -->
+        <texture name="floor_tex"   type="2d" builtin="checker" rgb1="0.7 0.7 0.7" rgb2="0.8 0.8 0.8" width="100" height="100" />
+
+        <!--Materials-->
+        <!-- <material name="floor_mat" texture="floor_tex" shininess="0.8" texrepeat="10 10" specular="0.7" reflectance="0.5" /> -->
+        <material name="floor_mat" texture="floor_tex" shininess="0.0" texrepeat="1 1" specular="0.0" />
+        <material name="wall_mat" rgba="0.7 0.7 0.7 1" shininess="0.8" specular="0.7" reflectance="0.5" />
+        <material name="bench_mat" texture="floor_tex" shininess="0.1" specular="0.5" reflectance="0.2"/>
+    </asset>
+
+	<worldbody>
+		<!-- <light directional="true" ambient="0.2 0.2 0.2" diffuse="0.8 0.8 0.8" specular="0.3 0.3 0.3" castshadow="false" pos="0 0 4" dir="0 0 -1" name="light0" /> -->
+		<light directional="true" ambient="0.2 0.2 0.2" diffuse="0.4 0.4 0.4" specular="0.1 0.1 0.1" castshadow="false" pos="0 0 4" dir="0 0 -1" name="light0" />
+
+        <!-- Floor Property -->
+        <geom name='floor' material="floor_mat" pos='0 0 0' size='5.0 5.0 0.1'  type='plane' condim="3"/>
+
+        <!-- Wall Property -->
+        <geom name='wall1' material="wall_mat" pos='0 4 0.5' size='3.9 0.1 0.5'  type='box' condim="6" group="2"/>
+        <geom name='wall2' material="wall_mat" pos='0 -4 0.5' size='3.9 0.1 0.5'  type='box' condim="6" group="2"/>
+        <geom name='wall3' material="wall_mat" pos='4 0 0.5' size='0.1 3.9 0.5'  type='box' condim="6" group="2"/>
+        <geom name='wall4' material="wall_mat" pos='-4 0 0.5' size='0.1 3.9 0.5'  type='box' condim="6" group="2"/>
+
+		<!-- camera: front view -->
+		<camera mode="fixed" name="frontview" pos="3.0 0 1.85" quat="0.56 0.43 0.43 0.56"/>
+
+		<!-- Robot -->
+		<body name="robot" pos="0 0 0.06344">
+            <site name="robot" pos="0 0 0"/>
+            <joint type="free" name="robot" damping="0"/>
+
+            <geom pos="0 0 -0.0655" quat="0.5 0.5 0.5 0.5" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.15 0.15 0.15 1" mesh="base"/>
+            <!-- <geom pos="0 0 0" quat="1 0 0 0" type="sphere" size="0.5" contype="0" conaffinity="0" group="1" rgba="0.2 1.0 0 0.3" mass="0.000001"/> -->
+            <geom pos="0 0 0" quat="0 0 0 1" type="mesh" contype="0" conaffinity="0" group="1" rgba="1.0 0.7 0 1" mesh="fender"/>
+            <geom pos="0 0 0" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" rgba="1.0 0.7 0 1" mesh="fender"/>
+            <geom pos="0.131 0.187795 0.0345" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.15 0.15 0.15 1" mesh="wheel"/>
+            <geom pos="0.131 -0.187795 0.0345" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.15 0.15 0.15 1" mesh="wheel"/>
+            <geom pos="-0.131 0.187795 0.0345" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.15 0.15 0.15 1" mesh="wheel"/>
+            <geom pos="-0.131 -0.187795 0.0345" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.15 0.15 0.15 1" mesh="wheel"/>
+
+            <geom name="robot" size="0.21 0.155 0.092" pos="0 0 0.092" type="box" rgba="0.2 0.2 0.2 1" group="5"/>
+            <body name="left" pos="0.0 0.187795 0.0345">
+                <joint type="hinge" name="left" axis="0 1 0"/>
+                <geom type="cylinder" name="left" size="0.098 0.02" quat="0.707107 0.707107 0 0" group="5" condim="4"/>
+            </body>
+            <body name="right" pos="0.0 -0.187795 0.0345">
+                <joint type="hinge" name="right" axis="0 1 0"/>
+                <geom type="cylinder" name="right" size="0.098 0.02" quat="0.707107 0.707107 0 0" group="5" condim="4"/>
+            </body>
+            <body name="front" pos="0.131 0 -0.0155">
+                <joint name="front" type="ball"/>
+                <geom name="front" size="0.048" group="5"/>
+            </body>
+            <body name="rear" pos="-0.131 0 -0.0155">
+                <joint name="rear" type="ball"/>
+                <geom name="rear" size="0.048" group="5"/>
+            </body>
+		</body>
+
+        <!-- Hazard -->
+        <!-- <body name="box1" pos="2.0 2.0 0.25">
+            <site name="box1" pos="0 0 0"/>
+            <joint type="free" name="box1" frictionloss="0" damping="0" />
+            <geom name="box1" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" contype="0" conaffinity="0" mass="0.1" group="2"/>
+        </body>
+        <body name="box2" pos="2.0 1.0 0.25">
+            <site name="box2" pos="0 0 0"/>
+            <joint type="free" name="box2" frictionloss="0" damping="0" />
+            <geom name="box2" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" contype="0" conaffinity="0" mass="0.1" group="2"/>
+        </body>
+        <body name="box3" pos="2.0 0.0 0.25">
+            <site name="box3" pos="0 0 0"/>
+            <joint type="free" name="box3" frictionloss="0" damping="0" />
+            <geom name="box3" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" contype="0" conaffinity="0" mass="0.1" group="2"/>
+        </body>
+        <body name="box4" pos="2.0 -1.0 0.25">
+            <site name="box4" pos="0 0 0"/>
+            <joint type="free" name="box4" frictionloss="0" damping="0" />
+            <geom name="box4" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" contype="0" conaffinity="0" mass="0.1" group="2"/>
+        </body>
+        <body name="box5" pos="2.0 -2.0 0.25">
+            <site name="box5" pos="0 0 0"/>
+            <joint type="free" name="box5" frictionloss="0" damping="0" />
+            <geom name="box5" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" contype="0" conaffinity="0" mass="0.1" group="2"/>
+        </body>
+        <body name="box6" pos="1.0 1.0 0.25">
+            <site name="box6" pos="0 0 0"/>
+            <joint type="free" name="box6" frictionloss="0" damping="0" />
+            <geom name="box6" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" contype="0" conaffinity="0" mass="0.1" group="2"/>
+        </body>
+        <body name="box7" pos="1.0 0.0 0.25">
+            <site name="box7" pos="0 0 0"/>
+            <joint type="free" name="box7" frictionloss="0" damping="0" />
+            <geom name="box7" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" contype="0" conaffinity="0" mass="0.1" group="2"/>
+        </body>
+        <body name="box8" pos="1.0 -1.0 0.25">
+            <site name="box8" pos="0 0 0"/>
+            <joint type="free" name="box8" frictionloss="0" damping="0" />
+            <geom name="box8" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" contype="0" conaffinity="0" mass="0.1" group="2"/>
+        </body> -->
+        <body name="box1" pos="2.0 2.0 0.25">
+            <site name="box1" pos="0 0 0"/>
+            <joint type="free" name="box1" frictionloss="0" damping="0" />
+            <geom name="box1" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box2" pos="2.0 1.0 0.25">
+            <site name="box2" pos="0 0 0"/>
+            <joint type="free" name="box2" frictionloss="0" damping="0" />
+            <geom name="box2" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box3" pos="2.0 0.0 0.25">
+            <site name="box3" pos="0 0 0"/>
+            <joint type="free" name="box3" frictionloss="0" damping="0" />
+            <geom name="box3" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box4" pos="2.0 -1.0 0.25">
+            <site name="box4" pos="0 0 0"/>
+            <joint type="free" name="box4" frictionloss="0" damping="0" />
+            <geom name="box4" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box5" pos="2.0 -2.0 0.25">
+            <site name="box5" pos="0 0 0"/>
+            <joint type="free" name="box5" frictionloss="0" damping="0" />
+            <geom name="box5" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box6" pos="1.0 1.0 0.25">
+            <site name="box6" pos="0 0 0"/>
+            <joint type="free" name="box6" frictionloss="0" damping="0" />
+            <geom name="box6" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box7" pos="1.0 0.0 0.25">
+            <site name="box7" pos="0 0 0"/>
+            <joint type="free" name="box7" frictionloss="0" damping="0" />
+            <geom name="box7" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box8" pos="1.0 -1.0 0.25">
+            <site name="box8" pos="0 0 0"/>
+            <joint type="free" name="box8" frictionloss="0" damping="0" />
+            <geom name="box8" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <!-- <body name="box9" pos="2.0 2.0 0.25">
+            <site name="box9" pos="0 0 0"/>
+            <joint type="free" name="box9" frictionloss="0" damping="0" />
+            <geom name="box9" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box10" pos="2.0 1.0 0.25">
+            <site name="box10" pos="0 0 0"/>
+            <joint type="free" name="box10" frictionloss="0" damping="0" />
+            <geom name="box10" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box11" pos="2.0 0.0 0.25">
+            <site name="box11" pos="0 0 0"/>
+            <joint type="free" name="box11" frictionloss="0" damping="0" />
+            <geom name="box11" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box12" pos="2.0 -1.0 0.25">
+            <site name="box12" pos="0 0 0"/>
+            <joint type="free" name="box12" frictionloss="0" damping="0" />
+            <geom name="box12" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box13" pos="2.0 -2.0 0.25">
+            <site name="box13" pos="0 0 0"/>
+            <joint type="free" name="box13" frictionloss="0" damping="0" />
+            <geom name="box13" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box14" pos="1.0 1.0 0.25">
+            <site name="box14" pos="0 0 0"/>
+            <joint type="free" name="box14" frictionloss="0" damping="0" />
+            <geom name="box14" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box15" pos="1.0 0.0 0.25">
+            <site name="box15" pos="0 0 0"/>
+            <joint type="free" name="box15" frictionloss="0" damping="0" />
+            <geom name="box15" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body>
+        <body name="box16" pos="1.0 -1.0 0.25">
+            <site name="box16" pos="0 0 0"/>
+            <joint type="free" name="box16" frictionloss="0" damping="0" />
+            <geom name="box16" type="box" size="0.25 0.25 0.25" rgba="0 0 1 1" mass="0.1" group="2"/>
+        </body> -->
+
+        <!-- goal -->
+        <body name="goal" pos="1.0 -1.0 1.0">
+            <site name="goal" pos="0 0 0"/>
+            <joint type="free" name="goal" frictionloss="0" damping="0" />
+            <geom type="cylinder" size="0.25 0.25 0.25" contype="0" conaffinity="0" group="1" rgba="1 0.2 0 0.3" mass="0.1"/>
+        </body>
+
+	</worldbody>
+
+    <sensor>
+        <!-- Used for observation -->
+        <accelerometer site="robot" name="accelerometer"/>
+        <velocimeter site="robot" name="velocimeter"/>
+        <gyro site="robot" name="gyro"/>
+    </sensor>
+
+    <!--ACTUATORS-->
+    <actuator>
+        <!-- <velocity gear="0.04" jointinparent="left" name="left"/>
+        <velocity gear="0.04" jointinparent="right" name="right"/> -->
+
+        <motor gear="0.3 0 0 0 0 0" joint="left" name="left"/>
+        <motor gear="0.3 0 0 0 0 0" joint="right" name="right"/>
+    </actuator>
+</mujoco>

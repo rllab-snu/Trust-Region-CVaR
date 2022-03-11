@@ -1,0 +1,11 @@
+*.pyc
+*.o
+*.so
+*.gch
+*.pt
+args.txt
+__pycache__
+.vscode
+.ipynb_checkpoints
+wandb
+results
