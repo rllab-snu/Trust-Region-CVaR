@@ -59,7 +59,7 @@ class Agent:
             self.cost_var_targets_ph = tf.placeholder(tf.float32, [None,], name='cost_var_targets')
             self.gaes_ph = tf.placeholder(tf.float32, [None,], name='gaes')
             self.cost_gaes_ph = tf.placeholder(tf.float32, [None,], name='cost_gaes')
-            self.cost_var_gaes_ph = tf.placeholder(tf.float32, [None,], name='cost_var_gaes')
+            self.cost_square_gaes_ph = tf.placeholder(tf.float32, [None,], name='cost_square_gaes')
             self.old_means_ph = tf.placeholder(tf.float32, [None, self.action_dim], name='old_means')
             self.old_stds_ph = tf.placeholder(tf.float32, [None, self.action_dim], name='old_stds')
             self.cost_mean_ph = tf.placeholder(tf.float32, (), name='cost_mean')
@@ -118,9 +118,9 @@ class Agent:
             self.grad_g = tf.gradients(self.objective, p_vars)
             self.grad_g = tf.concat([tf.reshape(g, [-1]) for g in self.grad_g], axis=0)
 
-            #cost value at risk
+            #cost CVaR
             self.approx_cost_mean = self.cost_mean_ph + (1.0/(1.0 - self.discount_factor))*tf.reduce_mean(prob_ratios*self.cost_gaes_ph)
-            self.approx_cost_var = self.cost_var_mean_ph + (1.0/(1.0 - self.discount_factor**2))*tf.reduce_mean(prob_ratios*self.cost_var_gaes_ph)
+            self.approx_cost_var = self.cost_var_mean_ph + (1.0/(1.0 - self.discount_factor**2))*tf.reduce_mean(prob_ratios*self.cost_square_gaes_ph)
             self.cost_surrogate = self.approx_cost_mean + self.sigma_unit*tf.sqrt(tf.clip_by_value(self.approx_cost_var, EPS, np.inf))
             self.grad_b = tf.gradients(-self.cost_surrogate, p_vars)
             self.grad_b = tf.concat([tf.reshape(b, [-1]) for b in self.grad_b], axis=0)
@@ -225,7 +225,6 @@ class Agent:
         for t in reversed(range(len(gaes))):
             if t < len(gaes) - 1:
                 gaes[t] = gaes[t] + (1.0 - dones[t])*(self.discount_factor**2)*self.gae_coeff*gaes[t + 1]
-        targets = np.array(var_values) + np.array(gaes)
         targets = np.clip(np.array(var_values) + np.array(gaes), 0.0, np.inf)
         return gaes, targets
 
@@ -234,7 +233,7 @@ class Agent:
         actions_list = []
         gaes_list = []
         cost_gaes_list = []
-        cost_var_gaes_list = []
+        cost_square_gaes_list = []
         targets_list = []
         cost_targets_list = []
         cost_var_targets_list = []
@@ -255,13 +254,13 @@ class Agent:
 
             gaes, targets = self.getGaesTargets(rewards, values, dones, fails, next_values)
             cost_gaes, cost_targets = self.getGaesTargets(costs, cost_values, dones, fails, next_cost_values)
-            cost_var_gaes, cost_var_targets = self.getVarGaesTargets(costs, cost_values, cost_var_values, dones, fails, next_cost_values, next_cost_var_values)
+            cost_square_gaes, cost_var_targets = self.getVarGaesTargets(costs, cost_values, cost_var_values, dones, fails, next_cost_values, next_cost_var_values)
 
             states_list.append(states)
             actions_list.append(actions)
             gaes_list.append(gaes)
             cost_gaes_list.append(cost_gaes)
-            cost_var_gaes_list.append(cost_var_gaes)
+            cost_square_gaes_list.append(cost_square_gaes)
             targets_list.append(targets)
             cost_targets_list.append(cost_targets)
             cost_var_targets_list.append(cost_var_targets)
@@ -271,14 +270,14 @@ class Agent:
         actions = np.concatenate(actions_list)
         gaes = np.concatenate(gaes_list)
         cost_gaes = np.concatenate(cost_gaes_list)
-        cost_var_gaes = np.concatenate(cost_var_gaes_list)
+        cost_square_gaes = np.concatenate(cost_square_gaes_list)
         targets = np.concatenate(targets_list)
         cost_targets = np.concatenate(cost_targets_list)
         cost_var_targets = np.concatenate(cost_var_targets_list)
 
         gaes = (gaes - np.mean(gaes))/(np.std(gaes) + EPS)
         cost_gaes -= np.mean(cost_gaes)
-        cost_var_gaes -= np.mean(cost_var_gaes)
+        cost_square_gaes -= np.mean(cost_square_gaes)
 
         entropy = self.sess.run(self.entropy, feed_dict={self.states_ph:states})
         old_means, old_stds = self.sess.run([self.means, self.stds], feed_dict={self.states_ph:states, self.actions_ph:actions})
@@ -291,7 +290,7 @@ class Agent:
             self.actions_ph:actions,
             self.gaes_ph:gaes,
             self.cost_gaes_ph:cost_gaes,
-            self.cost_var_gaes_ph:cost_var_gaes,
+            self.cost_square_gaes_ph:cost_square_gaes,
             self.old_means_ph:old_means,
             self.old_stds_ph:old_stds,
             self.cost_mean_ph:cost_mean,
