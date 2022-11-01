@@ -166,8 +166,7 @@ class Agent:
         for t in reversed(range(len(gaes))):
             if t < len(gaes) - 1:
                 gaes[t] = gaes[t] + (1.0 - dones[t])*((self.discount_factor*self.gae_coeff)**2)*gaes[t + 1]
-        targets = np.array(var_values) + np.array(gaes)
-        targets = np.clip(targets, 0.0, np.inf)
+        targets = np.clip(np.array(var_values) + np.array(gaes), 0.0, np.inf)
         return gaes, targets
 
     def train(self, trajs):
@@ -175,7 +174,7 @@ class Agent:
         actions_list = []
         gaes_list = []
         cost_gaes_list = []
-        cost_var_gaes_list = []
+        cost_square_gaes_list = []
         targets_list = []
         cost_targets_list = []
         cost_var_targets_list = []
@@ -213,13 +212,13 @@ class Agent:
             next_cost_var_values_tensor = self.cost_var_value(next_states_tensor)
             cost_var_values = cost_var_values_tensor.detach().cpu().numpy()
             next_cost_var_values = next_cost_var_values_tensor.detach().cpu().numpy()
-            cost_var_gaes, cost_var_targets = self.getVarGaesTargets(costs, cost_values, cost_var_values, dones, fails, next_cost_values, next_cost_var_values)
+            cost_square_gaes, cost_var_targets = self.getVarGaesTargets(costs, cost_values, cost_var_values, dones, fails, next_cost_values, next_cost_var_values)
 
             states_list.append(states)
             actions_list.append(actions)
             gaes_list.append(gaes)
             cost_gaes_list.append(cost_gaes)
-            cost_var_gaes_list.append(cost_var_gaes)
+            cost_square_gaes_list.append(cost_square_gaes)
             targets_list.append(targets)
             cost_targets_list.append(cost_targets)
             cost_var_targets_list.append(cost_var_targets)
@@ -229,14 +228,14 @@ class Agent:
         actions = np.concatenate(actions_list)
         gaes = np.concatenate(gaes_list)
         cost_gaes = np.concatenate(cost_gaes_list)
-        cost_var_gaes = np.concatenate(cost_var_gaes_list)
+        cost_square_gaes = np.concatenate(cost_square_gaes_list)
         targets = np.concatenate(targets_list)
         cost_targets = np.concatenate(cost_targets_list)
         cost_var_targets = np.concatenate(cost_var_targets_list)
 
         gaes = (gaes - np.mean(gaes))/(np.std(gaes) + EPS)
         cost_gaes -= np.mean(cost_gaes)
-        cost_var_gaes -= np.mean(cost_var_gaes)
+        cost_square_gaes -= np.mean(cost_square_gaes)
         cost_mean = np.mean(cost_means_list)
         cost_var_mean = np.mean(cost_var_targets)
 
@@ -248,7 +247,7 @@ class Agent:
         targets_tensor = torch.tensor(targets, device=self.device, dtype=torch.float32)
         cost_gaes_tensor = torch.tensor(cost_gaes, device=self.device, dtype=torch.float32)
         cost_targets_tensor = torch.tensor(cost_targets, device=self.device, dtype=torch.float32)
-        cost_var_gaes_tensor = torch.tensor(cost_var_gaes, device=self.device, dtype=torch.float32)
+        cost_square_gaes_tensor = torch.tensor(cost_square_gaes, device=self.device, dtype=torch.float32)
         cost_std_targets_tensor = torch.tensor(np.sqrt(cost_var_targets), device=self.device, dtype=torch.float32)
 
         # ==================== for policy update ==================== #
@@ -260,7 +259,7 @@ class Agent:
         # get objective & KL & cost surrogate
         objective, entropy = self.getObjective(states_tensor, norm_actions_tensor, gaes_tensor, old_means, old_stds)
         cost_surrogate = self.getCostSurrogate(states_tensor, norm_actions_tensor, old_means, \
-                            old_stds, cost_gaes_tensor, cost_var_gaes_tensor, cost_mean, cost_var_mean)
+                            old_stds, cost_gaes_tensor, cost_square_gaes_tensor, cost_mean, cost_var_mean)
         kl = self.getKL(states_tensor, old_means, old_stds)
 
         # get gradient
@@ -347,7 +346,7 @@ class Agent:
             self.applyParams(theta)
             objective, entropy = self.getObjective(states_tensor, norm_actions_tensor, gaes_tensor, old_means, old_stds)
             cost_surrogate = self.getCostSurrogate(states_tensor, norm_actions_tensor, old_means, \
-                                old_stds, cost_gaes_tensor, cost_var_gaes_tensor, cost_mean, cost_var_mean)
+                                old_stds, cost_gaes_tensor, cost_square_gaes_tensor, cost_mean, cost_var_mean)
             kl = self.getKL(states_tensor, old_means, old_stds)
             if kl <= self.max_kl and (objective > init_objective if optim_case > 1 else True) and cost_surrogate - init_cost_surrogate <= max(-c_value, 0):
                 break
@@ -395,7 +394,7 @@ class Agent:
         objective += self.ent_coeff*(entropy/self.action_dim)
         return objective, entropy
 
-    def getCostSurrogate(self, states, norm_actions, old_means, old_stds, cost_gaes, cost_var_gaes, cost_mean, cost_var_mean):
+    def getCostSurrogate(self, states, norm_actions, old_means, old_stds, cost_gaes, cost_square_gaes, cost_mean, cost_var_mean):
         means, log_stds, stds = self.policy(states)
         dist = torch.distributions.Normal(means, stds)
         old_dist = torch.distributions.Normal(old_means, old_stds)
@@ -403,7 +402,7 @@ class Agent:
         old_log_probs = torch.sum(old_dist.log_prob(norm_actions), dim=1)
 
         approx_cost_mean = cost_mean + (1.0/(1.0 - self.discount_factor))*(torch.mean(torch.exp(log_probs - old_log_probs)*cost_gaes))
-        apprx_cost_var = cost_var_mean + (1.0/(1.0 - self.discount_factor**2))*(torch.mean(torch.exp(log_probs - old_log_probs)*cost_var_gaes))
+        apprx_cost_var = cost_var_mean + (1.0/(1.0 - self.discount_factor**2))*(torch.mean(torch.exp(log_probs - old_log_probs)*cost_square_gaes))
         cost_surrogate = approx_cost_mean + self.sigma_unit*torch.sqrt(torch.clamp(apprx_cost_var, EPS, np.inf))
         return cost_surrogate
 
