@@ -165,21 +165,6 @@ def train(args):
         optim_hist = np.histogram([optim_case], bins=np.arange(0, 6))
 
         print_len = max(int(args.n_steps/args.max_episode_steps), args.n_envs)
-        log_data = {
-            "rollout/score": score_logger.get_avg(print_len), 
-            "rollout/ep_len": eplen_logger.get_avg(print_len),
-            "rollout/ep_cv": cv_logger.get_avg(print_len),
-            "rollout/cost_sum_mean": cost_logger.get_avg(print_len),
-            "rollout/cost_sum_cvar": cost_logger.get_cvar(agent.sigma_unit, print_len),
-            "train/value_loss":v_loss_logger.get_avg(), 
-            "train/cost_value_loss":cost_v_loss_logger.get_avg(), 
-            "train/cost_var_value_loss":cost_var_v_loss_logger.get_avg(), 
-            "metric/objective":objective_logger.get_avg(), 
-            "metric/cost_surrogate":cost_surrogate_logger.get_avg(), 
-            "metric/kl":kl_logger.get_avg(), 
-            "metric/entropy":entropy_logger.get_avg(),
-            "metric/optim_case":wandb.Histogram(np_histogram=optim_hist), 
-        }
 
         if args.wandb:
             wandb.log(log_data)
