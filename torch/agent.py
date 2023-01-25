@@ -17,6 +17,9 @@ import os
 
 EPS = 1e-8
 
+def random():
+    return np.random.rand()
+
 @torch.jit.script
 def normalize(a, maximum, minimum):
     temp_a = 1.0/(maximum - minimum)
