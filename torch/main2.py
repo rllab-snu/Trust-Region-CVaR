@@ -111,19 +111,6 @@ def train(args):
     # define agent
     agent = Agent(args)
 
-    # logger
-    objective_logger = Logger(args.save_dir, 'objective')
-    cost_surrogate_logger = Logger(args.save_dir, 'cost_surrogate')
-    v_loss_logger = Logger(args.save_dir, 'v_loss')
-    cost_v_loss_logger = Logger(args.save_dir, 'cost_v_loss')
-    cost_var_v_loss_logger = Logger(args.save_dir, 'cost_var_v_loss')
-    kl_logger = Logger(args.save_dir, 'kl')
-    entropy_logger = Logger(args.save_dir, 'entropy')
-    score_logger = Logger(args.save_dir, 'score')
-    eplen_logger = Logger(args.save_dir, 'eplen')
-    cost_logger = Logger(args.save_dir, 'cost')
-    cv_logger = Logger(args.save_dir, 'cv')
-
     # train
     observations = vec_env.reset()
     reward_history = [[] for _ in range(args.n_envs)]
