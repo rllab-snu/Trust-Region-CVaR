@@ -164,14 +164,6 @@ def train(args):
         v_loss, cost_v_loss, cost_var_v_loss, objective, cost_surrogate, kl, entropy, optim_case = agent.train(trajectories)
         optim_hist = np.histogram([optim_case], bins=np.arange(0, 6))
 
-        objective_logger.write([step, objective])
-        cost_surrogate_logger.write([step, cost_surrogate])
-        v_loss_logger.write([step, v_loss])
-        cost_v_loss_logger.write([step, cost_v_loss])
-        cost_var_v_loss_logger.write([step, cost_var_v_loss])
-        kl_logger.write([step, kl])
-        entropy_logger.write([step, entropy])
-
         print_len = max(int(args.n_steps/args.max_episode_steps), args.n_envs)
         log_data = {
             "rollout/score": score_logger.get_avg(print_len), 
