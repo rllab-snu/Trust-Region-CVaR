@@ -193,29 +193,6 @@ def test(args):
         cv = 0
         step = 0
 
-        while True:
-            step += 1
-            with torch.no_grad():
-                obs_tensor = torch.tensor(state, device=args.device, dtype=torch.float32)
-                action_tensor, clipped_action_tensor = agent.getAction(obs_tensor, False)
-                action = action_tensor.detach().cpu().numpy()
-                clipped_action = clipped_action_tensor.detach().cpu().numpy()
-            next_state, reward, done, info = env.step(clipped_action)
-            env.render()
-
-            state = next_state
-            score += reward
-            cv += info['num_cv']
-
-            if done or step >= args.max_episode_steps:
-                break
-        scores.append(score)
-        cvs.append(cv)
-        print(score, cv)
-
-    print(np.mean(scores), np.mean(cvs))
-    env.close()
-
 
 if __name__ == "__main__":
     parser = getPaser()
