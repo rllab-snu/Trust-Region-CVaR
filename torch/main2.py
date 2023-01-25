@@ -153,11 +153,6 @@ def train(args):
                     ep_cv = np.sum(cv_history[env_idx])
                     cost_sum = np.sum(cost_history[env_idx])
 
-                    score_logger.write([ep_len, score])
-                    eplen_logger.write([ep_len, ep_len])
-                    cost_logger.write([ep_len, cost_sum])
-                    cv_logger.write([ep_len, ep_cv])
-
                     reward_history[env_idx] = []
                     cost_history[env_idx] = []
                     cv_history[env_idx] = []
