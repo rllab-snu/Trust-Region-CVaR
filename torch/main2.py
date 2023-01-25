@@ -165,30 +165,8 @@ def train(args):
         optim_hist = np.histogram([optim_case], bins=np.arange(0, 6))
 
         print_len = max(int(args.n_steps/args.max_episode_steps), args.n_envs)
+        print(print_len)
 
-        if args.wandb:
-            wandb.log(log_data)
-        log_data["metric/optim_case"] = optim_hist[0]/np.sum(optim_hist[0])
-        print(log_data)
-
-        if total_step - slack_step >= args.slack_freq and args.slack:
-            slackbot.sendMsg(f"{project_name}\nname: {wandb.run.name}\nsteps: {total_step}\nlog: {log_data}")
-            slack_step += args.slack_freq
-
-        if total_step - save_step >= args.save_freq:
-            save_step += args.save_freq
-            agent.save()
-            objective_logger.save()
-            cost_surrogate_logger.save()
-            v_loss_logger.save()
-            cost_v_loss_logger.save()
-            cost_var_v_loss_logger.save()
-            entropy_logger.save()
-            kl_logger.save()
-            score_logger.save()
-            eplen_logger.save()
-            cv_logger.save()
-            cost_logger.save()
 
 
 def test(args):
