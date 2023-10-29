@@ -107,21 +107,6 @@ def parse(algo_dirs, item_name, window_size, interp_steps):
     smoothed_means, smoothed_stds = smoothing(algo_datas, window_size)
     return min_linspace, smoothed_means, smoothed_stds
 
-def smoothing(data, window_size):
-    means = []
-    stds = []
-    for i in range(1, len(data[0]) + 1):
-        if i < window_size:
-            start_idx = 0
-        else:
-            start_idx = i - window_size
-        end_idx = i
-        concat_data = np.concatenate([item[start_idx:end_idx] for item in data])
-        a = np.mean(concat_data)
-        b = np.std(concat_data)
-        means.append(a)
-        stds.append(b)
-    return np.array(means), np.array(stds)
 
 if __name__ == "__main__":
     main()
