@@ -8,10 +8,6 @@ import random
 import time
 import os
 
-LOG_STD_MAX = 2
-LOG_STD_MIN = -4
-EPS = 1e-8
-
 class Agent:
     def __init__(self, args):
         '''
