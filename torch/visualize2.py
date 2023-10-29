@@ -43,10 +43,6 @@ def draw(env_name, item_list, algo_list, fig_size, window_size, interp_steps, is
             algo_dirs = ['{}/{}_log'.format(dir_item, item_name.replace('total_', '').replace('metric', 'score')) for dir_item in algo_logs]
             linspace, means, stds = parse(algo_dirs, item_name, window_size, interp_steps)
 
-            if item_name == "cv":
-                means /= 1000.0
-                stds /= 1000.0
-
             ax.plot(linspace, means, lw=2, label=algo_name)
             ax.fill_between(linspace, means - stds, means + stds, alpha=0.15)
             max_value = max(max_value, np.max(means + stds))
