@@ -8,6 +8,10 @@ import random
 import time
 import os
 
+LOG_STD_MAX = 2
+LOG_STD_MIN = -4
+EPS = 1e-8
+
 class Agent:
     def __init__(self, args):
         '''
@@ -41,10 +45,6 @@ class Agent:
         self.num_conjugate = args.num_conjugate
         self.line_decay = args.line_decay
         self.max_kl = args.max_kl
-        # for cost
-        self.cost_d = args.cost_d
-        self.cost_alpha = args.cost_alpha
-        self.sigma_unit = norm.pdf(norm.ppf(self.cost_alpha))/self.cost_alpha
 
         with tf.variable_scope(self.name):
             #placeholder
