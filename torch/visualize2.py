@@ -60,15 +60,6 @@ def draw(env_name, item_list, algo_list, fig_size, window_size, interp_steps, is
 
         else:
             ax.set_title(item_name)
-        
-
-    fig.tight_layout()
-    save_dir = "./imgs"
-    item_names = '&'.join(item_list)
-    env_name = env_name.replace(' ', '')
-    if not os.path.isdir(save_dir): os.makedirs(save_dir)
-    plt.savefig(f'{save_dir}/{env_name}_{item_names}3.png')
-    plt.show()
 
 
 def parse(algo_dirs, item_name, window_size, interp_steps):
