@@ -58,22 +58,6 @@ def draw(env_name, item_list, algo_list, fig_size, window_size, interp_steps, is
         if item_idx == 0 and is_horizon:
             ax.legend(loc='upper left', ncol=1, borderaxespad=0.)
 
-        if item_name == "metric":
-            ax.set_title(f'{prefix}Score{postfix}', fontsize=fontsize)
-            if "doggo" in env_name.lower():
-                ax.set_ylim(-3.0, 20.0)
-            if 'jackal' in env_name.lower():
-                ax.set_ylim(-2.0, 12.0)
-        elif item_name == "score":
-            ax.set_title(f'{prefix}Reward Sum{postfix}', fontsize=fontsize)
-        elif item_name == "cv":
-            ax.set_title(f'{prefix}CV{postfix}', fontsize=fontsize)
-            ax.set_ylim(0, max_value)
-        elif item_name == "total_cv":
-            ax.set_title(f'{prefix}Total CV{postfix}', fontsize=fontsize)
-            ax.set_ylim(0, max_value)
-            if 'jackal' in env_name.lower():
-                ax.set_ylim(0., 240000)
         else:
             ax.set_title(item_name)
         
