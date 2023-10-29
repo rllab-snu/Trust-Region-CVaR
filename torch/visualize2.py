@@ -61,13 +61,6 @@ def draw(env_name, item_list, algo_list, fig_size, window_size, interp_steps, is
         else:
             ax.set_title(item_name)
         
-        if 'doggo' in env_name.lower():
-            ax.set_xlim(0, 3e7)
-        elif 'jackal' in env_name.lower():
-            ax.set_xlim(0, 1e6)
-        else:
-            ax.set_xlim(0, 1e7)
-        ax.grid()
 
     fig.tight_layout()
     save_dir = "./imgs"
