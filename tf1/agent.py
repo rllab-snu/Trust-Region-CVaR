@@ -45,6 +45,10 @@ class Agent:
         self.num_conjugate = args.num_conjugate
         self.line_decay = args.line_decay
         self.max_kl = args.max_kl
+        # for cost
+        self.cost_d = args.cost_d
+        self.cost_alpha = args.cost_alpha
+        self.sigma_unit = norm.pdf(norm.ppf(self.cost_alpha))/self.cost_alpha
 
         with tf.variable_scope(self.name):
             #placeholder
