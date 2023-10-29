@@ -8,7 +8,7 @@ import sys
 import os
 
 def main():
-    fig_size = 3
+    fig_size = 5
     window_size = 500
     interp_steps = 1000
     item_list = ['metric', 'score', 'cv', 'total_cv']
